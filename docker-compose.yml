@@ -1,0 +1,45 @@
+services:
+
+  backend:
+    container_name: schemas_fastapi
+    build:
+      context: .
+    command: sh -c "alembic upgrade head && python -m schemas"
+    restart: always
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    networks:
+      - schemas_db_network
+
+  db:
+    container_name: schemas_db
+    image: postgres:16
+    restart: always
+    volumes:
+      - schemas_volume_db:/var/lib/postgresql/data
+    env_file: .env
+    environment:
+      - POSTGRES_SERVER=${DB_HOST}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d ${DB_NAME} -U ${DB_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    ports:
+      - "5432:5432"
+    networks:
+      - schemas_db_network
+
+volumes:
+  schemas_volume_db:
+
+
+networks:
+  schemas_db_network:
