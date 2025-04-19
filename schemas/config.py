@@ -43,9 +43,21 @@ class PostgresConfig(BaseConfig, env_prefix="DB_"):
         return f"postgresql+psycopg://{self.user}:{self.password.get_secret_value()}@{self.host}:{self.port}/{self.name}"
 
 
+class RabbitConfig(BaseConfig, env_prefix="RABBIT_"):
+    host: str
+    user: str
+    password: SecretStr
+    port: int
+
+    @property
+    def get_url(self) -> str:
+        return f"amqp://{self.user}:{self.password.get_secret_value()}@{self.host}:{self.port}/"
+
+
 class Config(BaseConfig):
     app: APPConfig
     postgres: PostgresConfig
+    rabbit: RabbitConfig
 
 
-config = Config(postgres=PostgresConfig(), app=APPConfig())
+config = Config(postgres=PostgresConfig(), app=APPConfig(), rabbit=RabbitConfig())
