@@ -178,6 +178,32 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+# JetBrains IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+*.iws
+.idea_modules/
+out/
+atlassian-ide-plugin.xml
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+.ideaDataSources/
+dataSources/
+.shelf/
+runConfigurations/
+httpRequests/
+projectSettingsUpdater.xml
+contentModel.xml
+.idea/sonarlint/
+
+# PyCharm venv directories
+.venv/
+venv/
+ENV/
 
 ### Python Patch ###
 # Poetry local configuration file - https://python-poetry.org/docs/configuration/#local-configuration
