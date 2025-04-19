@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 
 from schemas.db.schemas.message import MessageCreateSchema, MessageSchema
-from schemas.endpoints.dependencies import get_session, WebSocketOAuth, OAuth
+from schemas.endpoints.dependencies import OAuth, WebSocketOAuth, get_session
 from schemas.services.message import MessageService
 from schemas.services.websocket_service import ConnectionManager
 from schemas.utils.enums import SenderType
@@ -12,6 +12,7 @@ from schemas.utils.enums import SenderType
 router = APIRouter()
 manager = ConnectionManager()
 logger = logging.getLogger(__name__)
+
 
 class RabbitClientServiceStub:
     async def connect(self):
@@ -32,9 +33,9 @@ rabbit_service = RabbitClientServiceStub()
 @router.websocket("/ws/{chat_id}")
 async def websocket_endpoint(
     websocket: WebSocket,
-        chat_id: UUID,
-        auth: WebSocketOAuth,
-        session=Depends(get_session),
+    chat_id: UUID,
+    auth: WebSocketOAuth,
+    session=Depends(get_session),
 ):
     message_service = MessageService(session)
     await manager.connect(websocket, chat_id)
@@ -64,7 +65,7 @@ async def websocket_endpoint(
                 sender_type=saved_ai_message.sender_type,
                 chat_id=chat_id,
                 created_at=saved_ai_message.created_at,
-                updated_at=saved_ai_message.updated_at
+                updated_at=saved_ai_message.updated_at,
             )
             await manager.send_message(response_message, chat_id)
     except WebSocketDisconnect:

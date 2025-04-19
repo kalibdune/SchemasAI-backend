@@ -1,6 +1,6 @@
+import logging
 from typing import Annotated
 
-import logging
 from fastapi import Depends, Path, Request, WebSocket, WebSocketException, status
 
 from schemas.config import config
@@ -31,7 +31,10 @@ async def res_check_auth(
     except:
         return None
 
-async def websocket_auth(websocket: WebSocket, session=Depends(get_session)) -> UserSchema:
+
+async def websocket_auth(
+    websocket: WebSocket, session=Depends(get_session)
+) -> UserSchema:
     cookies_header = websocket.headers.get("cookie", "")
     cookies = {}
 
@@ -51,6 +54,7 @@ async def websocket_auth(websocket: WebSocket, session=Depends(get_session)) -> 
     except Exception as e:
         logging.error(f"WebSocket authentication failed: %s", str(e))
         raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
+
 
 WebSocketOAuth = Annotated[UserSchema, Depends(websocket_auth)]
 OAuth = Annotated[UserSchema, Depends(check_auth)]
