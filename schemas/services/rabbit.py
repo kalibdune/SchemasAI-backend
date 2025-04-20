@@ -64,3 +64,6 @@ class RabbitClientService:
         logging.info(f" [x] Sent message: {message!r}")
 
         return MessageCreateSchema.model_validate(json.loads((await future).decode()))
+
+
+client_service = RabbitClientService()

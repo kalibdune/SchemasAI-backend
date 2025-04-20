@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from schemas.db.schemas.message import MessageCreateSchema, MessageSchema
 from schemas.endpoints.dependencies import WebSocketOAuth, get_session
 from schemas.services.message import MessageService
-from schemas.services.rabbit import RabbitClientService
+from schemas.services.rabbit import client_service
 from schemas.utils.enums import SenderType
 
 router = APIRouter()
@@ -21,7 +21,6 @@ async def websocket_endpoint(
     session=Depends(get_session),
 ):
     message_service = MessageService(session)
-    client_service = await RabbitClientService().connect()
     await websocket.accept()
     try:
         while True:
