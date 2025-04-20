@@ -10,6 +10,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "8000:8000"
     networks:
@@ -34,6 +36,25 @@ services:
       retries: 3
     ports:
       - "5432:5432"
+    networks:
+      - schemas_db_network
+
+  rabbitmq:
+    container_name: schemas_rabbitmq
+    image: rabbitmq:4-management
+    restart: always
+    env_file: .env
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBIT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBIT_PASSWORD}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - schemas_db_network
 
