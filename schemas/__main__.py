@@ -1,4 +1,5 @@
 import logging
+from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI, Request
@@ -6,11 +7,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from schemas.endpoints import routers
+from schemas.services.rabbit import client_service
 from schemas.utils.exceptions import BaseAPIException
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Schemas")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await client_service.connect()
+    yield
+    await client_service.connection.close()
+
+
+app = FastAPI(title="Schemas", lifespan=lifespan)
 
 app.include_router(routers)
 app.add_middleware(

@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import uuid
 from typing import MutableMapping
 
@@ -12,7 +13,7 @@ from aio_pika.abc import (
 )
 
 from schemas.config import config
-from schemas.db.schemas.message import MessageSchema
+from schemas.db.schemas.message import MessageCreateSchema, MessageSchema
 
 
 class RabbitClientService:
@@ -33,13 +34,17 @@ class RabbitClientService:
 
     async def _on_response(self, message: AbstractIncomingMessage) -> None:
         if message.correlation_id is None:
-            print(f"Bad message {message!r}")
+            logging.warning(
+                f" [x] Received message without correlation_id: {message!r}"
+            )
             return
 
         future: asyncio.Future = self.futures.pop(message.correlation_id)
         future.set_result(message.body)
 
-    async def call(self, routing_key: str, message: MessageSchema) -> MessageSchema:
+    async def call(
+        self, routing_key: str, message: MessageSchema
+    ) -> MessageCreateSchema:
         correlation_id = str(uuid.uuid4())
         loop = asyncio.get_running_loop()
         future = loop.create_future()
@@ -48,7 +53,7 @@ class RabbitClientService:
 
         await self.channel.default_exchange.publish(
             Message(
-                message.model_dump_json().encode(),
+                message.model_dump_json().encode("utf-8"),
                 content_type="application/json",
                 correlation_id=correlation_id,
                 reply_to=self.callback_queue.name,
@@ -56,4 +61,9 @@ class RabbitClientService:
             routing_key=routing_key,
         )
 
-        return MessageSchema.model_validate(json.loads((await future).decode()))
+        logging.info(f" [x] Sent message: {message!r}")
+
+        return MessageCreateSchema.model_validate(json.loads((await future).decode()))
+
+
+client_service = RabbitClientService()
