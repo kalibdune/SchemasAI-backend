@@ -32,11 +32,21 @@ class MessageService:
     async def get_paginated_messages_by_chat_id(
         self, chat_id: UUID, start: str, count: int
     ) -> list[MessageSchema]:
+        offset = 0
+        if start != "last":
+            try:
+                offset = int(start)
+                if offset < 0:
+                    offset = 0
+            except ValueError:
+                raise ValueError("start must be a number or 'last'")
+
         messages = await self._repository.get_paginated_by_chat_id(
-            chat_id, start, count
+            chat_id, offset, count
         )
         if not messages:
             return []
+
         return [
             MessageSchema.model_validate(message, from_attributes=True)
             for message in messages
