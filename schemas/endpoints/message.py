@@ -1,7 +1,8 @@
 import logging
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Query, Response, status
+from sqlalchemy.util.queue import Queue
 
 from schemas.db.models import Message
 from schemas.db.schemas.message import (
@@ -34,10 +35,16 @@ async def create_message(
     status_code=status.HTTP_200_OK,
 )
 async def get_messages_by_chat_id(
-    chat_id: UUID, auth: OAuth, session=Depends(get_session)
+    chat_id: UUID,
+    auth: OAuth,
+    session=Depends(get_session),
+    start: str = Query("last", description="Starting point ('last' or message number)"),
+    count: int = Query(10, description="Number of messages to retrieve", ge=1, le=50),
 ):
     message_service = MessageService(session)
-    return await message_service.get_messages_by_chat_id(chat_id)
+    return await message_service.get_paginated_messages_by_chat_id(
+        chat_id, start, count
+    )
 
 
 @router.get("/{id}", response_model=MessageSchema, status_code=status.HTTP_200_OK)
