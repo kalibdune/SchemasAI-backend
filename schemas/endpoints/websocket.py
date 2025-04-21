@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 async def websocket_endpoint(
     websocket: WebSocket,
     chat_id: UUID,
-    auth: WebSocketOAuth,
     session=Depends(get_session),
 ):
     message_service = MessageService(session)
