@@ -34,6 +34,6 @@ async def websocket_endpoint(
             ai_message = await client_service.call("message_queue", saved_user_message)
             saved_ai_message = await message_service.create_message(ai_message, chat_id)
 
-            await websocket.send_json(saved_ai_message.model_dump_json())
+            await websocket.send_json(ai_message.model_dump_json())
     except WebSocketDisconnect:
         logging.info(f"Client disconnected: {chat_id}")
