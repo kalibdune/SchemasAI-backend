@@ -38,8 +38,8 @@ async def get_messages_by_chat_id(
     chat_id: UUID,
     auth: OAuth,
     session=Depends(get_session),
-    start: str = Query("last", description="Starting point ('last' or message number)"),
-    count: int = Query(10, description="Number of messages to retrieve", ge=1, le=50),
+    start: str = Query(..., description="Starting point ('last' or message number)"),
+    count: int = Query(..., description="Number of messages to retrieve", ge=1, le=50),
 ):
     message_service = MessageService(session)
     return await message_service.get_paginated_messages_by_chat_id(
